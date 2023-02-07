@@ -4,7 +4,6 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 from sqlalchemy.orm import sessionmaker
 import json
-from pprint import pprint
 from models import create_tables, Publisher, Book, Stock, Sale, Shop
 
 
@@ -38,14 +37,11 @@ def show_info(publ):
     if type(publ) == str:
         publ = session.query(Publisher.id).filter(Publisher.name.ilike(publ)).all()[0][0]
 
-    subq = session.query(Book.id, Book.title).join(Publisher.books).filter(Publisher.id == publ).subquery()
-
-    for c in session.query(subq.c.title, Shop.name, Sale.price, Sale.date_sale
-                       ).join(Stock.shops_2).join(Stock.sales).join(subq, Stock.id_book == subq.c.id).all():
+    for c in session.query(Book.title, Shop.name, Sale.price, Sale.date_sale
+                       ).join(Publisher).join(Stock).join(Sale).join(Shop).filter(Publisher.id == publ).all():
         print(f'{c[0]} | {c[1]} | {c[2]} | {c[3]}')
 
 
-show_info()
-
+show_info(1)
 
 session.close()
